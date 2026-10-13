@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Alunos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="tel"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        .table-section {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-remove {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Sistema de Cadastro de Alunos</h1>
+        
+        <div class="form-section">
+            <form id="formAluno">
+                <div class="form-group">
+                    <label for="ra">RA (Registro Acadêmico):</label>
+                    <input type="text" id="ra" name="ra" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nome">Nome Completo:</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dataNascimento">Data de Nascimento:</label>
+                    <input type="date" id="dataNascimento" name="dataNascimento" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone">Telefone:</label>
+                    <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
+                </div>
+
+                <button type="submit" class="btn-add">➕ Adicionar Aluno</button>
+            </form>
+        </div>
+
+        <div class="table-section">
+            <table id="tabelaAlunos">
+                <thead>
+                    <tr>
+                        <th>RA</th>
+                        <th>Nome</th>
+                        <th>Data de Nascimento</th>
+                        <th>Telefone</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela">
+                    <tr>
+                        <td colspan="5" class="empty-message">Nenhum aluno cadastrado ainda.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function removerLinha(botao) {
+            const linha = botao.closest('tr');
+            linha.remove();
+
+            const tbody = document.getElementById('corpoTabela');
+            if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-message">Nenhum aluno cadastrado ainda.</td></tr>';
+            }
+        }
+
+        function formatarData(data) {
+            if (!data) return '-';
+            const partes = data.split('-');
+            return partes[2] + '/' + partes[1] + '/' + partes[0];
+        }
+
+        const formAluno = document.getElementById('formAluno');
+        const corpoTabela = document.getElementById('corpoTabela');
+
+        formAluno.addEventListener('submit', function(evento) {
+            evento.preventDefault();
+            
+            const ra = document.getElementById('ra').value.trim();
+            const nome = document.getElementById('nome').value.trim();
+            const dataNascimento = document.getElementById('dataNascimento').value;
+            const telefone = document.getElementById('telefone').value.trim();
+
+            if (!ra || !nome || !dataNascimento) {
+                alert('Por favor, preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            const primeiraLinha = corpoTabela.querySelector('.empty-message');
+            if (primeiraLinha) {
+                corpoTabela.innerHTML = '';
+            }
+
+            const novaLinha = document.createElement('tr');
+            
+            const tdRA = document.createElement('td');
+            tdRA.textContent = ra;
+            
+            const tdNome = document.createElement('td');
+            tdNome.textContent = nome;
+            
+            const tdData = document.createElement('td');
+            tdData.textContent = formatarData(dataNascimento);
+            
+            const tdTelefone = document.createElement('td');
+            tdTelefone.textContent = telefone || '-';
+            
+            const tdAcao = document.createElement('td');
+            const btnRemover = document.createElement('button');
+            btnRemover.className = 'btn-remove';
+            btnRemover.textContent = '🗑️ Remover';
+            btnRemover.onclick = function() {
+                removerLinha(this);
+            };
+            tdAcao.appendChild(btnRemover);
+            
+            novaLinha.appendChild(tdRA);
+            novaLinha.appendChild(tdNome);
+            novaLinha.appendChild(tdData);
+            novaLinha.appendChild(tdTelefone);
+            novaLinha.appendChild(tdAcao);
+            
+            corpoTabela.appendChild(novaLinha);
+
+            formAluno.reset();
+            document.getElementById('ra').focus();
+        });
+
+        const inputTelefone = document.getElementById('telefone');
+        inputTelefone.addEventListener('input', function(e) {
+            let valor = e.target.value.replace(/\D/g, '');
+            
+            if (valor.length > 11) {
+                valor = valor.slice(0, 11);
+            }
+            
+            if (valor.length > 6) {
+                valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+            } else if (valor.length > 2) {
+                valor = valor.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+            } else if (valor.length > 0) {
+                valor = valor.replace(/^(\d*)/, '($1');
+            }
+            
+            e.target.value = valor;
+        });
+    </script>
+</body>
+</html>
